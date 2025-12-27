@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HymnLok Middle School Hard Mode</title>
+    <title>HymnLok Balanced</title>
     <style>
         :root { --math: #3b82f6; --ela: #a855f7; --sci: #10b981; --soc: #e74c3c; }
         body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f1f5f9; display: flex; justify-content: center; padding: 20px; }
         #app { background: #1e293b; width: 100%; max-width: 600px; padding: 40px; border-radius: 24px; border: 1px solid #334155; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
         .hidden { display: none !important; }
         .visual-box { background: #0f172a; border: 1px solid #334155; border-radius: 16px; padding: 25px; margin: 20px 0; text-align: center; font-size: 60px; }
-        .btn { display: block; width: 100%; padding: 18px; margin: 10px 0; border: 1px solid #334155; border-radius: 12px; cursor: pointer; background: #1e293b; text-align: left; font-size: 16px; color: #cbd5e1; transition: 0.2s; border: 1px solid #334155; }
+        .btn { display: block; width: 100%; padding: 18px; margin: 10px 0; border: 1px solid #334155; border-radius: 12px; cursor: pointer; background: #1e293b; text-align: left; font-size: 16px; color: #cbd5e1; transition: 0.2s; }
         .btn:hover { background: #334155; border-color: #3b82f6; color: #fff; transform: translateX(5px); }
         .sub-btn { color: white; border: none; text-align: center; font-size: 18px; font-weight: 700; }
         #progress-bar { height: 10px; background: #0f172a; border-radius: 10px; margin-bottom: 20px; overflow: hidden; }
         #progress-fill { height: 100%; width: 0%; transition: 0.4s; }
-        .grade-tag { font-size: 12px; padding: 5px 15px; background: #3b82f6; border-radius: 8px; color: #fff; font-weight: 800; transition: all 0.3s ease; }
+        .grade-tag { font-size: 12px; padding: 5px 15px; background: #3b82f6; border-radius: 8px; color: #fff; font-weight: 800; }
         .dot { width: 10px; height: 10px; background: #334155; border-radius: 50%; }
         .dot.active { background: #10b981; box-shadow: 0 0 10px #10b981; }
         .downrank { background: #ef4444 !important; animation: shake 0.5s; }
@@ -26,12 +26,12 @@
 
 <div id="app">
     <div id="home">
-        <h1 style="text-align:center; font-size: 50px; font-weight: 800; margin-bottom: 5px;">HymnLok</h1>
-        <p style="text-align:center; color: #94a3b8; margin-bottom: 30px;">Adv. Middle School Adaptive (30 Items)</p>
-        <button class="btn sub-btn" style="background:var(--math)" onclick="run('math')">📐 Advanced Math</button>
-        <button class="btn sub-btn" style="background:var(--ela)" onclick="run('ela')">📖 Advanced ELA</button>
-        <button class="btn sub-btn" style="background:var(--sci)" onclick="run('science')">🧬 General Science</button>
-        <button class="btn sub-btn" style="background:var(--soc)" onclick="run('social')">🌍 World History</button>
+        <h1 style="text-align:center; font-size: 50px; font-weight: 800;">HymnLok</h1>
+        <p style="text-align:center; color: #94a3b8; margin-bottom: 30px;">Balanced Adaptive Challenge</p>
+        <button class="btn sub-btn" style="background:var(--math)" onclick="run('math')">📐 Mathematics</button>
+        <button class="btn sub-btn" style="background:var(--ela)" onclick="run('ela')">📖 Language Arts</button>
+        <button class="btn sub-btn" style="background:var(--sci)" onclick="run('science')">🧬 Science</button>
+        <button class="btn sub-btn" style="background:var(--soc)" onclick="run('social')">🌍 Social Studies</button>
     </div>
 
     <div id="quiz" class="hidden">
@@ -39,65 +39,64 @@
             <span id="q-count" style="color:#64748b; font-size: 14px; font-weight: bold;">ITEM 1 / 30</span>
             <span id="grade-level" class="grade-tag">GRADE 6</span>
         </div>
-        <div style="display:flex; gap:8px; margin-bottom:10px;">
-            <div class="dot" id="d1"></div><div class="dot" id="d2"></div><div class="dot" id="d3"></div>
-        </div>
+        <div style="display:flex; gap:8px; margin-bottom:10px;"><div class="dot" id="d1"></div><div class="dot" id="d2"></div><div class="dot" id="d3"></div></div>
         <div id="progress-bar"><div id="progress-fill"></div></div>
         <div id="visual-area" class="visual-box"></div>
-        <h2 id="q-text" style="font-weight: 500; min-height: 60px; font-size: 19px;"></h2>
+        <h2 id="q-text" style="font-weight: 500;"></h2>
         <div id="options"></div>
     </div>
 
     <div id="results" class="hidden">
-        <h1 style="text-align:center;">Evaluation Over</h1>
+        <h1 style="text-align:center;">Session Complete</h1>
         <div id="final-rit" style="text-align:center; font-size: 80px; font-weight: 900; color: #3b82f6;"></div>
         <p id="accuracy" style="text-align:center; color:#10b981; font-weight:800;"></p>
         <p id="feedback" style="text-align:center; font-size: 20px; font-weight: bold;"></p>
-        <button class="btn" style="text-align:center; background: #f8fafc; color: #0f172a; font-weight: 800;" onclick="location.reload()">Return to Start</button>
+        <button class="btn" style="text-align:center; background: #f8fafc; color: #0f172a; font-weight: 800;" onclick="location.reload()">Return to Menu</button>
     </div>
 </div>
 
 <script>
 const items = {
     "math": [
-        { q: "A jacket costs $80 but is 30% off. What is the final price?", v: "🏷️", a: ["$56", "$64", "$50", "$24"], c: "$56" },
-        { q: "What is the volume of a cylinder with radius 2 and height 5? (Use 3.14 for π)", v: "🥫", a: ["62.8", "31.4", "20.0", "12.56"], c: "62.8" },
-        { q: "Simplify the expression: 4(x + 2) - 3x", v: "⚖️", a: ["x + 8", "7x + 8", "x + 2", "4x + 5"], c: "x + 8" },
-        { q: "Solve for x: 2x/5 = 8", v: "🔢", a: ["20", "10", "40", "16"], c: "20" },
-        { q: "Find the surface area of a cube with side length 3.", v: "📦", a: ["54", "27", "36", "9"], c: "54" },
-        { q: "If a car travels 150 miles in 2.5 hours, what is its average speed?", v: "🏎️", a: ["60 mph", "55 mph", "75 mph", "65 mph"], c: "60 mph" },
-        { q: "What is the sum of the interior angles of a pentagon?", v: "📐", a: ["540°", "360°", "180°", "720°"], c: "540°" },
-        { q: "Solve for n: 3(n - 4) = 15", v: "⚖️", a: ["9", "7", "5", "11"], c: "9" },
-        { q: "Express 0.00045 in scientific notation.", v: "🔬", a: ["4.5 x 10^-4", "4.5 x 10^-5", "45 x 10^-3", "0.45 x 10^-3"], c: "4.5 x 10^-4" },
-        { q: "A bag has 3 red marbles and 7 blue. Probability of picking red?", v: "🎲", a: ["30%", "70%", "3/7", "50%"], c: "30%" }
+        { q: "Solve for x: 3x + 4 = 19", v: "⚖️", a: ["5", "6", "15", "7"], c: "5" },
+        { q: "What is the area of a circle with a radius of 4? (Use π = 3.14)", v: "⭕", a: ["50.24", "12.56", "25.12", "16.0"], c: "50.24" },
+        { q: "Find 25% of 120.", v: "🔢", a: ["30", "25", "40", "60"], c: "30" },
+        { q: "Evaluate: 2³ + 5 × 2", v: "🔢", a: ["18", "26", "16", "30"], c: "18" },
+        { q: "What is the surface area of a cube with side 2?", v: "📦", a: ["24", "8", "16", "12"], c: "24" },
+        { q: "A car goes 240 miles in 4 hours. What is its speed?", v: "🚗", a: ["60 mph", "50 mph", "70 mph", "65 mph"], c: "60 mph" },
+        { q: "Simplify the fraction 24/36.", v: "🍕", a: ["2/3", "3/4", "1/2", "5/6"], c: "2/3" },
+        { q: "Solve for y: y/3 - 2 = 5", v: "⚖️", a: ["21", "15", "9", "18"], c: "21" },
+        { q: "A triangle has angles of 45° and 90°. What is the third angle?", v: "📐", a: ["45°", "60°", "90°", "30°"], c: "45°" },
+        { q: "What is 0.08 expressed as a percentage?", v: "🔢", a: ["8%", "0.8%", "80%", "0.08%"], c: "8%" }
     ],
     "ela": [
-        { q: "What is the meaning of 'adversity'?", v: "📖", a: ["Difficulties/Hardship", "Good luck", "Clear weather", "A type of advertisement"], c: "Difficulties/Hardship" },
-        { q: "Which sentence uses an 'Oxymoron'?", v: "✍️", a: ["The giant shrimp was delicious.", "He ran like the wind.", "The sun smiled down.", "I'm so hungry I could eat a horse."], c: "The giant shrimp was delicious." },
-        { q: "Identify the 'Mood' of a story that uses words like 'dreary,' 'shadowy,' and 'eerie.'", v: "🎭", a: ["Suspenseful/Gloomy", "Cheerful", "Optimistic", "Humorous"], c: "Suspenseful/Gloomy" },
-        { q: "What is 'Alliteration'?", v: "🔡", a: ["Repetition of consonant sounds", "Exaggeration for effect", "Comparing two unlike things", "Words that mimic sounds"], c: "Repetition of consonant sounds" },
-        { q: "What is the 'Climax' of a plot?", v: "🏔️", a: ["The turning point of highest tension", "The beginning", "The resolution", "The falling action"], c: "The turning point of highest tension" }
+        { q: "Which word is a synonym for 'Prosper'?", v: "📈", a: ["Thrive", "Fail", "Begin", "Wait"], c: "Thrive" },
+        { q: "What is the 'Setting' of a story?", v: "🏔️", a: ["Time and Place", "Main Character", "The Problem", "The Ending"], c: "Time and Place" },
+        { q: "Identify the metaphor:", v: "📖", a: ["Time is a thief.", "He ran like a cheetah.", "The cat meowed.", "A big blue bird."], c: "Time is a thief." },
+        { q: "Which word is an interjection?", v: "🗯️", a: ["Ouch!", "Running", "Beautiful", "Between"], c: "Ouch!" },
+        { q: "What is the 'Point of View' when the narrator uses 'I' and 'Me'?", v: "👤", a: ["First Person", "Third Person", "Second Person", "Omniscient"], c: "First Person" }
     ],
     "science": [
-        { q: "In a plant cell, which organelle is responsible for photosynthesis?", v: "🌿", a: ["Chloroplast", "Mitochondria", "Nucleus", "Vacuole"], c: "Chloroplast" },
-        { q: "What is the main difference between an Element and a Compound?", v: "🧪", a: ["Elements are pure; Compounds are mixed", "Elements are liquids; Compounds are solids", "Compounds are pure; Elements are mixed", "There is no difference"], c: "Elements are pure; Compounds are mixed" },
-        { q: "Which layer of the Earth is responsible for the magnetic field?", v: "🌍", a: ["Outer Core", "Crust", "Upper Mantle", "Inner Core"], c: "Outer Core" },
-        { q: "What type of energy is stored in a battery?", v: "🔋", a: ["Chemical Potential", "Kinetic", "Thermal", "Nuclear"], c: "Chemical Potential" },
-        { q: "What is the density of an object with mass 20g and volume 5cm³?", v: "⚖️", a: ["4 g/cm³", "100 g/cm³", "0.25 g/cm³", "15 g/cm³"], c: "4 g/cm³" }
+        { q: "Which planet is known as the 'Gas Giant' and has a Great Red Spot?", v: "🪐", a: ["Jupiter", "Saturn", "Neptune", "Mars"], c: "Jupiter" },
+        { q: "What is the process where plants release water vapor into the air?", v: "🍃", a: ["Transpiration", "Evaporation", "Photosynthesis", "Respiration"], c: "Transpiration" },
+        { q: "Which part of the atom has a negative charge?", v: "⚛️", a: ["Electron", "Proton", "Neutron", "Nucleus"], c: "Electron" },
+        { q: "What kind of rock is formed from cooled magma/lava?", v: "🌋", a: ["Igneous", "Sedimentary", "Metamorphic", "Fossil"], c: "Igneous" },
+        { q: "Which organ system is responsible for transporting oxygen through the body?", v: "🫀", a: ["Circulatory", "Respiratory", "Nervous", "Digestive"], c: "Circulatory" }
     ],
     "social": [
-        { q: "What was the main cause of the Black Death in the 14th century?", v: "🐀", a: ["Bacteria on fleas", "Bad air", "Lack of exercise", "Volcanic eruptions"], c: "Bacteria on fleas" },
-        { q: "The 'Silk Road' was primarily used for:", v: "🐪", a: ["Trade between Europe and Asia", "A marathon route", "Religious pilgrimages only", "Military invasions of Africa"], c: "Trade between Europe and Asia" },
-        { q: "Which ancient civilization created the first democracy?", v: "🏛️", a: ["Greece", "Rome", "Egypt", "Mesopotamia"], c: "Greece" },
-        { q: "What is the purpose of the 'Checks and Balances' system in government?", v: "⚖️", a: ["Prevent one branch from being too powerful", "Count the money in the treasury", "Balance the number of states", "Control the weather"], c: "Prevent one branch from being too powerful" }
+        { q: "Which document starts with 'We the People'?", v: "📜", a: ["The Constitution", "Declaration of Independence", "The Bill of Rights", "Common Sense"], c: "The Constitution" },
+        { q: "The Renaissance began in which country?", v: "🎨", a: ["Italy", "France", "England", "Spain"], c: "Italy" },
+        { q: "What are the three branches of the US Government?", v: "⚖️", a: ["Leg, Exec, Jud", "State, Fed, Local", "Pres, Cong, Mayor", "Army, Navy, Air"], c: "Leg, Exec, Jud" },
+        { q: "Which continent is also a country?", v: "🌏", a: ["Australia", "Antarctica", "Africa", "Europe"], c: "Australia" },
+        { q: "What was the main route for westward expansion in the 1800s?", v: "🛤️", a: ["Oregon Trail", "Silk Road", "Route 66", "The Appalachian Path"], c: "Oregon Trail" }
     ]
 };
 
-const grades = ["GRADE 6 (ADV)", "GRADE 7 (ADV)", "GRADE 8 (ADV)"];
-let state = { sub: "", idx: 0, rit: 218, seen: [], streak: 0, gradeIdx: 0, correct: 0 };
+const grades = ["GRADE 6", "GRADE 7", "GRADE 8"];
+let state = { sub: "", idx: 0, rit: 216, seen: [], streak: 0, gradeIdx: 0, correct: 0 };
 
 function run(s) {
-    state = { sub: s, idx: 0, rit: 218, seen: [], streak: 0, gradeIdx: 0, correct: 0 };
+    state = { sub: s, idx: 0, rit: 216, seen: [], streak: 0, gradeIdx: 0, correct: 0 };
     document.getElementById('home').classList.add('hidden');
     document.getElementById('quiz').classList.remove('hidden');
     document.getElementById('progress-fill').style.background = `var(--${s})`;
@@ -153,8 +152,8 @@ function finish() {
     document.getElementById('quiz').classList.add('hidden');
     document.getElementById('results').classList.remove('hidden');
     document.getElementById('final-rit').innerText = state.rit;
-    document.getElementById('accuracy').innerText = `Mastery: ${state.correct} / 30`;
-    document.getElementById('feedback').innerText = `Final Level: ${grades[state.gradeIdx]}`;
+    document.getElementById('accuracy').innerText = `Score: ${state.correct} / 30`;
+    document.getElementById('feedback').innerText = `Certified: ${grades[state.gradeIdx]}`;
 }
 </script>
 </body>
