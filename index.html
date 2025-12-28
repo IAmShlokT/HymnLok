@@ -3,21 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HymnLok 140-Question Edition</title>
+    <title>HymnLok STEM Tutoring Edition</title>
     <style>
         :root { --math: #3b82f6; --ela: #a855f7; --sci: #10b981; --soc: #e74c3c; }
         body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f1f5f9; display: flex; justify-content: center; padding: 20px; }
-        #app { background: #1e293b; width: 100%; max-width: 600px; padding: 40px; border-radius: 24px; border: 1px solid #334155; }
+        #app { background: #1e293b; width: 100%; max-width: 650px; padding: 40px; border-radius: 24px; border: 1px solid #334155; }
         .hidden { display: none !important; }
+        .passage-box { background: #0f172a; border: 1px solid #a855f7; border-radius: 12px; padding: 20px; margin-bottom: 20px; font-style: italic; line-height: 1.6; font-size: 15px; color: #cbd5e1; max-height: 250px; overflow-y: auto; }
         .visual-box { background: #0f172a; border: 1px solid #334155; border-radius: 16px; padding: 25px; margin: 20px 0; text-align: center; font-size: 60px; }
         .btn { display: block; width: 100%; padding: 18px; margin: 10px 0; border: 1px solid #334155; border-radius: 12px; cursor: pointer; background: #1e293b; text-align: left; font-size: 16px; color: #cbd5e1; transition: 0.2s; }
-        .btn:hover { background: #334155; border-color: #3b82f6; color: #fff; }
+        .btn:hover:not(:disabled) { background: #334155; border-color: #3b82f6; color: #fff; }
         .sub-btn { color: white; border: none; text-align: center; font-size: 18px; font-weight: 700; }
         #progress-bar { height: 10px; background: #0f172a; border-radius: 10px; margin-bottom: 20px; overflow: hidden; }
         #progress-fill { height: 100%; width: 0%; transition: 0.4s; }
         .grade-tag { font-size: 12px; padding: 5px 15px; background: #3b82f6; border-radius: 8px; color: #fff; font-weight: 800; }
-        .dot { width: 10px; height: 10px; background: #334155; border-radius: 50%; }
-        .dot.active { background: #10b981; box-shadow: 0 0 10px #10b981; }
+        textarea { width: 100%; height: 120px; background: #0f172a; border: 1px solid #334155; border-radius: 12px; color: white; padding: 15px; font-family: inherit; margin-top: 10px; resize: none; border-left: 4px solid var(--ela); }
+        #feedback-msg { padding: 20px; border-radius: 12px; margin: 20px 0; font-weight: 500; }
+        .correct-fb { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid #10b981; }
+        .wrong-fb { background: rgba(231, 76, 60, 0.15); color: #e74c3c; border: 1px solid #e74c3c; }
+        .explanation-text { margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.2); font-size: 14px; color: #cbd5e1; font-style: italic; }
     </style>
 </head>
 <body>
@@ -25,11 +29,11 @@
 <div id="app">
     <div id="home">
         <h1 style="text-align:center; font-size: 50px; font-weight: 800;">HymnLok</h1>
-        <p style="text-align:center; color: #94a3b8; margin-bottom: 30px;">35-Item Reserve Pool (30 Question Session)</p>
-        <button class="btn sub-btn" style="background:var(--math)" onclick="run('math')">📐 Mathematics</button>
-        <button class="btn sub-btn" style="background:var(--ela)" onclick="run('ela')">📖 Language Arts</button>
-        <button class="btn sub-btn" style="background:var(--sci)" onclick="run('science')">🧬 Science</button>
-        <button class="btn sub-btn" style="background:var(--soc)" onclick="run('social')">🌍 Social Studies</button>
+        <p style="text-align:center; color: #94a3b8; margin-bottom: 30px;">STEM Explanation Module | Adaptive Learning</p>
+        <button class="btn sub-btn" style="background:var(--math)" onclick="startTest('math')">📐 Mathematics</button>
+        <button class="btn sub-btn" style="background:var(--ela)" onclick="startTest('ela')">📖 Language Arts</button>
+        <button class="btn sub-btn" style="background:var(--sci)" onclick="startTest('science')">🧬 Science</button>
+        <button class="btn sub-btn" style="background:var(--soc)" onclick="startTest('social')">🌍 Social Studies</button>
     </div>
 
     <div id="quiz" class="hidden">
@@ -37,229 +41,294 @@
             <span id="q-count" style="color:#64748b; font-size: 14px; font-weight: bold;">ITEM 1 / 30</span>
             <span id="grade-level" class="grade-tag">GRADE 6</span>
         </div>
-        <div style="display:flex; gap:8px; margin-bottom:10px;"><div class="dot" id="d1"></div><div class="dot" id="d2"></div><div class="dot" id="d3"></div></div>
         <div id="progress-bar"><div id="progress-fill"></div></div>
+        
+        <div id="passage-container" class="passage-box hidden"></div>
         <div id="visual-area" class="visual-box"></div>
         <h2 id="q-text" style="font-weight: 500; font-size: 1.2rem;"></h2>
-        <div id="options"></div>
+        
+        <div id="input-area"></div>
+        <div id="feedback-area" class="hidden">
+            <div id="feedback-msg"></div>
+            <button class="btn sub-btn" id="next-btn" style="background: #f1f5f9; color: #0f172a;">Continue Session →</button>
+        </div>
     </div>
 
     <div id="results" class="hidden">
         <h1 style="text-align:center;">Results</h1>
         <div id="final-rit" style="text-align:center; font-size: 80px; font-weight: 900; color: #3b82f6;"></div>
         <p id="accuracy" style="text-align:center; color:#10b981; font-weight:800;"></p>
-        <button class="btn" style="text-align:center; background: #f8fafc; color: #0f172a; font-weight: 800;" onclick="location.reload()">Start Over</button>
+        <button class="btn" style="text-align:center; background: #f8fafc; color: #0f172a; font-weight: 800;" onclick="location.reload()">Start New Session</button>
     </div>
 </div>
 
 <script>
-const items = {
+const allData = {
     "math": [
-        { q: "Solve for x: 4x - 7 = 21", v: "⚖️", a: ["7", "6", "8", "5"], c: "7" },
-        { q: "Area of a circle with radius 3? (π=3.14)", v: "⭕", a: ["28.26", "18.84", "9.42", "31.4"], c: "28.26" },
-        { q: "What is 15% of 60?", v: "🔢", a: ["9", "6", "12", "15"], c: "9" },
-        { q: "Volume of a box 4x3x2?", v: "📦", a: ["24", "12", "18", "48"], c: "24" },
-        { q: "Solve: 2(x + 5) = 22", v: "⚖️", a: ["6", "11", "12", "8"], c: "6" },
-        { q: "What is the square root of 225?", v: "√", a: ["15", "12", "25", "20"], c: "15" },
-        { q: "Find the median: 3, 7, 9, 12, 15", v: "📊", a: ["9", "7", "12", "10"], c: "9" },
-        { q: "Value of 4 to the power of 3?", v: "🔢", a: ["64", "16", "32", "12"], c: "64" },
-        { q: "A triangle has base 10 and height 4. Area?", v: "📐", a: ["20", "40", "14", "10"], c: "20" },
-        { q: "Next in sequence: 2, 5, 10, 17...", v: "🔢", a: ["26", "24", "25", "19"], c: "26" },
-        { q: "Write 3/8 as a decimal.", v: "🔢", a: ["0.375", "0.38", "0.4", "0.33"], c: "0.375" },
-        { q: "Degrees in a quadrilateral?", v: "▭", a: ["360", "180", "90", "270"], c: "360" },
-        { q: "Solve for y: y/4 + 6 = 10", v: "⚖️", a: ["16", "8", "4", "20"], c: "16" },
-        { q: "Slope of line through (0,0) and (2,4)?", v: "📈", a: ["2", "1/2", "4", "0"], c: "2" },
-        { q: "Simplest form of 42/56?", v: "🍕", a: ["3/4", "6/8", "1/2", "2/3"], c: "3/4" },
-        { q: "Absolute value of |-12 + 5|?", v: "🔢", a: ["7", "-7", "17", "0"], c: "7" },
-        { q: "GCF of 24 and 36?", v: "🔢", a: ["12", "6", "8", "4"], c: "12" },
-        { q: "How many mm in 1.5 meters?", v: "📏", a: ["1500", "150", "15", "15000"], c: "1500" },
-        { q: "Convert 5/4 to a percentage.", v: "🔢", a: ["125%", "80%", "120%", "25%"], c: "125%" },
-        { q: "Find the range: 10, 2, 8, 15, 1", v: "📊", a: ["14", "15", "10", "7"], c: "14" },
-        { q: "Solve: 5 squared minus 3 cubed.", v: "🔢", a: ["-2", "2", "3", "0"], c: "-2" },
-        { q: "Complementary angle to 30°?", v: "📐", a: ["60°", "150°", "90°", "30°"], c: "60°" },
-        { q: "A circle's diameter is 10. Circumference? (π=3.14)", v: "⭕", a: ["31.4", "15.7", "62.8", "100"], c: "31.4" },
-        { q: "Product of 1.2 and 0.5?", v: "🔢", a: ["0.6", "6", "0.06", "1.7"], c: "0.6" },
-        { q: "Prime factors of 12?", v: "🔢", a: ["2, 2, 3", "2, 6", "3, 4", "12, 1"], c: "2, 2, 3" },
-        { q: "Solve: 10 - (-5)", v: "⚖️", a: ["15", "5", "-5", "-15"], c: "15" },
-        { q: "What is 1/3 of 1/4?", v: "🍕", a: ["1/12", "1/7", "2/7", "3/4"], c: "1/12" },
-        { q: "Surface area of cube with side 3?", v: "📦", a: ["54", "27", "9", "36"], c: "54" },
-        { q: "If x=2, what is 3x² + 4?", v: "⚖️", a: ["16", "40", "10", "22"], c: "16" },
-        { q: "Sum of angles in a hexagon?", v: "⬡", a: ["720", "540", "360", "1080"], c: "720" },
-        { q: "Solve for k: 5k - 2 = 13", v: "⚖️", a: ["3", "5", "4", "2"], c: "3" },
-        { q: "A cube has volume 64. Side length?", v: "📦", a: ["4", "8", "16", "2"], c: "4" },
-        { q: "How many degrees in half a circle?", v: "📐", a: ["180", "90", "360", "270"], c: "180" },
-        { q: "Probability of picking a King from a 52 deck?", v: "🃏", a: ["1/13", "4/13", "1/52", "1/4"], c: "1/13" },
-        { q: "Sum of prime numbers between 1 and 10?", v: "🔢", a: ["17", "18", "15", "20"], c: "17" }
-    ],
-    "ela": [
-        { q: "Meaning of 'Exhilarating'?", v: "🎢", a: ["Thrilling", "Boring", "Tiring", "Scary"], c: "Thrilling" },
-        { q: "Antonym for 'Fragile'?", v: "💎", a: ["Sturdy", "Weak", "Broken", "Small"], c: "Sturdy" },
-        { q: "Identify the Onomatopoeia:", v: "💥", a: ["Sizzle", "Bright", "Quickly", "Walked"], c: "Sizzle" },
-        { q: "Main character of a story is the...", v: "🎭", a: ["Protagonist", "Antagonist", "Narrator", "Dynamic"], c: "Protagonist" },
-        { q: "A 'Hyperbole' is a huge...", v: "📈", a: ["Exaggeration", "Comparison", "Understatement", "Lie"], c: "Exaggeration" },
-        { q: "Which is a 'Proper Noun'?", v: "📍", a: ["Tokyo", "City", "Mountain", "River"], c: "Tokyo" },
-        { q: "Word that describes a verb?", v: "✨", a: ["Adverb", "Adjective", "Pronoun", "Noun"], c: "Adverb" },
-        { q: "A comparison using 'is' (not like/as)?", v: "📖", a: ["Metaphor", "Simile", "Personification", "Idiom"], c: "Metaphor" },
-        { q: "Which part of a plot resolves the conflict?", v: "🏁", a: ["Resolution", "Climax", "Exposition", "Rising Action"], c: "Resolution" },
-        { q: "The 'central message' of a text?", v: "💡", a: ["Theme", "Plot", "Setting", "Hook"], c: "Theme" },
-        { q: "A story of one's own life written by oneself?", v: "✍️", a: ["Autobiography", "Biography", "Fiction", "History"], c: "Autobiography" },
-        { q: "A group of lines in a poem?", v: "📜", a: ["Stanza", "Paragraph", "Chapter", "Verse"], c: "Stanza" },
-        { q: "Meaning of the prefix 'Bio-'?", v: "🧬", a: ["Life", "Earth", "Small", "Against"], c: "Life" },
-        { q: "Opposite of 'Chaos'?", v: "⚖️", a: ["Order", "Mess", "Noise", "Wild"], c: "Order" },
-        { q: "Punctuation to show strong emotion?", v: "❗", a: ["Exclamation Point", "Period", "Comma", "Semicolon"], c: "Exclamation Point" },
-        { q: "Words with same sounds but different meanings?", v: "👯", a: ["Homophones", "Synonyms", "Antonyms", "Nouns"], c: "Homophones" },
-        { q: "Identify the conjunction:", v: "🔗", a: ["Because", "Jump", "Yellow", "He"], c: "Because" },
-        { q: "Meaning of the suffix '-less'?", v: "❌", a: ["Without", "Full of", "Able to", "Most"], c: "Without" },
-        { q: "An 'Allusion' is a reference to...", v: "🏛️", a: ["Another work/event", "A sound", "A character's name", "The future"], c: "Another work/event" },
-        { q: "Identify the Adjective: 'The silent room.'", v: "🤫", a: ["Silent", "The", "Room", "Is"], c: "Silent" },
-        { q: "Past tense of 'Catch'?", v: "⚾", a: ["Caught", "Catched", "Catching", "Catchs"], c: "Caught" },
-        { q: "A person against the protagonist?", v: "😈", a: ["Antagonist", "Sidekick", "Hero", "Author"], c: "Antagonist" },
-        { q: "Meaning of 'Benevolent'?", v: "😇", a: ["Kind", "Cruel", "Rich", "Fast"], c: "Kind" },
-        { q: "Short story meant to teach a lesson?", v: "🦊", a: ["Fable", "Epic", "Novel", "Essay"], c: "Fable" },
-        { q: "Giving human traits to objects?", v: "🧸", a: ["Personification", "Simile", "Alliteration", "Irony"], c: "Personification" },
-        { q: "Identify the Preposition:", v: "🗺️", a: ["Under", "Fast", "Apple", "They"], c: "Under" },
-        { q: "Repetition of initial consonant sounds?", v: "🔡", a: ["Alliteration", "Rhyme", "Metaphor", "Rhythm"], c: "Alliteration" },
-        { q: "Informal, specialized language of a group?", v: "💬", a: ["Jargon", "Dialect", "Prose", "Formal"], c: "Jargon" },
-        { q: "An 'Oxymoron' is two words that...", v: "🌓", a: ["Contradict each other", "Rhyme", "Sound alike", "Are long"], c: "Contradict each other" },
-        { q: "A 'cliché' is an expression that is...", v: "😴", a: ["Overused", "Original", "Scientific", "Short"], c: "Overused" },
-        { q: "Identify the pronoun: 'We will win.'", v: "👤", a: ["We", "Will", "Win", "Them"], c: "We" },
-        { q: "Synonym for 'Lethargic'?", v: "😴", a: ["Tired", "Excited", "Fast", "Angry"], c: "Tired" },
-        { q: "A book's list of sources is called a...", v: "📚", a: ["Bibliography", "Index", "Glossary", "Preface"], c: "Bibliography" },
-        { q: "Which word is misspelled?", v: "✏️", a: ["Recieve", "Believe", "Achieve", "Deceive"], c: "Recieve" },
-        { q: "The 'Resolution' of a story comes...", v: "🏁", a: ["At the end", "At the start", "In the middle", "Never"], c: "At the end" }
+        { q: "Solve for x: 4x - 7 = 21", v: "⚖️", a: ["7", "6", "8", "5"], c: "7", exp: "Add 7 to both sides (4x=28), then divide by 4 (x=7)." },
+        { q: "Area of a circle with radius 3? (π=3.14)", v: "⭕", a: ["28.26", "18.84", "9.42", "31.4"], c: "28.26", exp: "Formula: πr². 3.14 * 3² = 3.14 * 9 = 28.26." },
+        { q: "What is 15% of 60?", v: "🔢", a: ["9", "6", "12", "15"], c: "9", exp: "15/100 * 60 = 0.15 * 60 = 9." },
+        { q: "Volume of a box 4x3x2?", v: "📦", a: ["24", "12", "18", "48"], c: "24", exp: "Multiply Length * Width * Height: 4 * 3 * 2 = 24." },
+        { q: "Solve: 2(x + 5) = 22", v: "⚖️", a: ["6", "11", "12", "8"], c: "6", exp: "Divide by 2 (x+5=11), then subtract 5 (x=6)." },
+        { q: "What is the square root of 225?", v: "√", a: ["15", "12", "25", "20"], c: "15", exp: "15 * 15 = 225." },
+        { q: "Find the median: 3, 7, 9, 12, 15", v: "📊", a: ["9", "7", "12", "10"], c: "9", exp: "The median is the middle value in a sorted list." },
+        { q: "Value of 4 to the power of 3?", v: "🔢", a: ["64", "16", "32", "12"], c: "64", exp: "4 * 4 * 4 = 64." },
+        { q: "A triangle has base 10 and height 4. Area?", v: "📐", a: ["20", "40", "14", "10"], c: "20", exp: "Formula: 1/2 * base * height = 1/2 * 10 * 4 = 20." },
+        { q: "Next in sequence: 2, 5, 10, 17...", v: "🔢", a: ["26", "24", "25", "19"], c: "26", exp: "The gap between numbers increases by 2 each time (+3, +5, +7, so next is +9)." },
+        { q: "Write 3/8 as a decimal.", v: "🔢", a: ["0.375", "0.38", "0.4", "0.33"], c: "0.375", exp: "Divide 3 by 8 to get 0.375." },
+        { q: "Degrees in a quadrilateral?", v: "▭", a: ["360", "180", "90", "270"], c: "360", exp: "All four-sided shapes have interior angles totaling 360°." },
+        { q: "Solve for y: y/4 + 6 = 10", v: "⚖️", a: ["16", "8", "4", "20"], c: "16", exp: "Subtract 6 (y/4 = 4), then multiply by 4 (y=16)." },
+        { q: "Slope of line through (0,0) and (2,4)?", v: "📈", a: ["2", "1/2", "4", "0"], c: "2", exp: "Slope = (y2-y1)/(x2-x1) = (4-0)/(2-0) = 2." },
+        { q: "Simplest form of 42/56?", v: "🍕", a: ["3/4", "6/8", "1/2", "2/3"], c: "3/4", exp: "Divide both by their Greatest Common Factor (14): 42/14=3, 56/14=4." },
+        { q: "Absolute value of |-12 + 5|?", v: "🔢", a: ["7", "-7", "17", "0"], c: "7", exp: "-12 + 5 = -7. The absolute value removes the negative sign." },
+        { q: "GCF of 24 and 36?", v: "🔢", a: ["12", "6", "8", "4"], c: "12", exp: "12 is the largest number that divides into both 24 and 36." },
+        { q: "How many mm in 1.5 meters?", v: "📏", a: ["1500", "150", "15", "15000"], c: "1500", exp: "1 meter = 1000mm. 1.5 * 1000 = 1500." },
+        { q: "Convert 5/4 to a percentage.", v: "🔢", a: ["125%", "80%", "120%", "25%"], c: "125%", exp: "5 / 4 = 1.25. Multiply by 100 to get 125%." },
+        { q: "Find the range: 10, 2, 8, 15, 1", v: "📊", a: ["14", "15", "10", "7"], c: "14", exp: "Range = Max - Min (15 - 1 = 14)." },
+        { q: "Solve: 5 squared minus 3 cubed.", v: "🔢", a: ["-2", "2", "3", "0"], c: "-2", exp: "5² (25) - 3³ (27) = -2." },
+        { q: "Complementary angle to 30°?", v: "📐", a: ["60°", "150°", "90°", "30°"], c: "60°", exp: "Complementary angles add up to 90°." },
+        { q: "Circle diameter is 10. Circumference?", v: "⭕", a: ["31.4", "15.7", "62.8", "100"], c: "31.4", exp: "Formula: π * diameter = 3.14 * 10 = 31.4." },
+        { q: "Product of 1.2 and 0.5?", v: "🔢", a: ["0.6", "6", "0.06", "1.7"], c: "0.6", exp: "12 * 5 = 60. Moving the decimal two places left gives 0.6." },
+        { q: "Prime factors of 12?", v: "🔢", a: ["2, 2, 3", "2, 6", "3, 4", "12, 1"], c: "2, 2, 3", exp: "Prime numbers only: 2 * 2 * 3 = 12." },
+        { q: "Solve: 10 - (-5)", v: "⚖️", a: ["15", "5", "-5", "-15"], c: "15", exp: "Subtracting a negative is the same as adding: 10 + 5 = 15." },
+        { q: "What is 1/3 of 1/4?", v: "🍕", a: ["1/12", "1/7", "2/7", "3/4"], c: "1/12", exp: "Multiply denominators: 1 * 1 / 3 * 4 = 1/12." },
+        { q: "Surface area of cube with side 3?", v: "📦", a: ["54", "27", "9", "36"], c: "54", exp: "6 sides * (3 * 3) = 6 * 9 = 54." },
+        { q: "If x=2, what is 3x² + 4?", v: "⚖️", a: ["16", "40", "10", "22"], c: "16", exp: "3 * (2²) + 4 = 3 * 4 + 4 = 16." },
+        { q: "Sum of angles in a hexagon?", v: "⬡", a: ["720", "540", "360", "1080"], c: "720", exp: "Formula: (n-2)*180 = (6-2)*180 = 720." },
+        { q: "Solve for k: 5k - 2 = 13", v: "⚖️", a: ["3", "5", "4", "2"], c: "3", exp: "5k = 15, so k = 3." },
+        { q: "A cube has volume 64. Side length?", v: "📦", a: ["4", "8", "16", "2"], c: "4", exp: "The cube root of 64 is 4 (4 * 4 * 4 = 64)." },
+        { q: "Degrees in half a circle?", v: "📐", a: ["180", "90", "360", "270"], c: "180", exp: "A full circle is 360°, so half is 180°." },
+        { q: "Probability of picking a King?", v: "🃏", a: ["1/13", "4/13", "1/52", "1/4"], c: "1/13", exp: "There are 4 Kings in 52 cards. 4/52 simplifies to 1/13." },
+        { q: "Sum of primes between 1 and 10?", v: "🔢", a: ["17", "18", "15", "20"], c: "17", exp: "Primes: 2, 3, 5, 7. Sum = 17." }
     ],
     "science": [
-        { q: "Smallest unit of an element?", v: "⚛️", a: ["Atom", "Molecule", "Cell", "Tissue"], c: "Atom" },
-        { q: "Which state of matter has a fixed volume but no fixed shape?", v: "💧", a: ["Liquid", "Solid", "Gas", "Plasma"], c: "Liquid" },
-        { q: "Earth's center layer?", v: "🌍", a: ["Core", "Mantle", "Crust", "Atmosphere"], c: "Core" },
-        { q: "Process by which plants make food?", v: "🌿", a: ["Photosynthesis", "Respiration", "Digestion", "Osmosis"], c: "Photosynthesis" },
-        { q: "Force that resists motion between surfaces?", v: "👞", a: ["Friction", "Gravity", "Magnetism", "Inertia"], c: "Friction" },
-        { q: "Unit of electrical resistance?", v: "⚡", a: ["Ohm", "Volt", "Amp", "Watt"], c: "Ohm" },
-        { q: "Which gas is most abundant in Earth's atmosphere?", v: "☁️", a: ["Nitrogen", "Oxygen", "Carbon Dioxide", "Argon"], c: "Nitrogen" },
-        { q: "A circuit with only one path is a...", v: "🔌", a: ["Series circuit", "Parallel circuit", "Short circuit", "Open circuit"], c: "Series circuit" },
-        { q: "Energy of motion is called...", v: "🏃", a: ["Kinetic", "Potential", "Thermal", "Chemical"], c: "Kinetic" },
-        { q: "What is the pH of pure water?", v: "🧪", a: ["7", "0", "14", "1"], c: "7" },
-        { q: "Blood cells that carry oxygen?", v: "🩸", a: ["Red cells", "White cells", "Platelets", "Plasma"], c: "Red cells" },
-        { q: "Turning from gas directly to solid?", v: "❄️", a: ["Deposition", "Sublimation", "Freezing", "Melting"], c: "Deposition" },
-        { q: "The 'Brain' of the cell?", v: "🧬", a: ["Nucleus", "Vacuole", "Ribosome", "Wall"], c: "Nucleus" },
-        { q: "Speed with a direction is...", v: "🏎️", a: ["Velocity", "Acceleration", "Momentum", "Inertia"], c: "Velocity" },
-        { q: "Type of rock formed by heat and pressure?", v: "💎", a: ["Metamorphic", "Igneous", "Sedimentary", "Magma"], c: "Metamorphic" },
-        { q: "Largest organ of the human body?", v: "👤", a: ["Skin", "Liver", "Lungs", "Brain"], c: "Skin" },
-        { q: "Temperature where all motion stops?", v: "🥶", a: ["Absolute Zero", "0°C", "0°F", "Freezing"], c: "Absolute Zero" },
-        { q: "Device used to measure air pressure?", v: "🌡️", a: ["Barometer", "Anemometer", "Thermometer", "Hygrometer"], c: "Barometer" },
-        { q: "Planets that lack solid surfaces?", v: "🪐", a: ["Gas Giants", "Terrestrial", "Dwarfs", "Moons"], c: "Gas Giants" },
-        { q: "Human body's master gland?", v: "🧠", a: ["Pituitary", "Thyroid", "Adrenal", "Heart"], c: "Pituitary" },
-        { q: "Substance that speeds up chemical reactions?", v: "🧪", a: ["Catalyst", "Isotope", "Solvent", "Acid"], c: "Catalyst" },
-        { q: "Moon phase when it is invisible?", v: "🌑", a: ["New Moon", "Full Moon", "Gibbous", "Crescent"], c: "New Moon" },
-        { q: "Animal without a backbone?", v: "🐛", a: ["Invertebrate", "Mammal", "Reptile", "Bird"], c: "Invertebrate" },
-        { q: "Study of weather?", v: "⛈️", a: ["Meteorology", "Geology", "Biology", "Astronomy"], c: "Meteorology" },
-        { q: "Force that pulls objects toward Earth?", v: "🌍", a: ["Gravity", "Tension", "Lift", "Drag"], c: "Gravity" },
-        { q: "Cloud type that looks like cotton balls?", v: "☁️", a: ["Cumulus", "Stratus", "Cirrus", "Nimbus"], c: "Cumulus" },
-        { q: "Distance light travels in a year?", v: "✨", a: ["Light Year", "Parsec", "Astronomical Unit", "Mach"], c: "Light Year" },
-        { q: "Bond where atoms share electrons?", v: "🤝", a: ["Covalent", "Ionic", "Metallic", "Hydrogen"], c: "Covalent" },
-        { q: "Earth's orbit shape?", v: "🔄", a: ["Elliptical", "Circular", "Square", "Wavy"], c: "Elliptical" },
-        { q: "First element on the Periodic Table?", v: "🎈", a: ["Hydrogen", "Helium", "Lithium", "Oxygen"], c: "Hydrogen" },
-        { q: "Energy stored in a spring is...", v: "🌀", a: ["Elastic Potential", "Thermal", "Kinetic", "Sound"], c: "Elastic Potential" },
-        { q: "A push or pull is called a...", v: "💥", a: ["Force", "Power", "Weight", "Work"], c: "Force" },
-        { q: "Part of the plant that takes in water?", v: "🌱", a: ["Roots", "Leaves", "Stem", "Flower"], c: "Roots" },
-        { q: "Hottest planet in the solar system?", v: "🔥", a: ["Venus", "Mercury", "Jupiter", "Mars"], c: "Venus" },
-        { q: "Measure of the pull of gravity on mass?", v: "⚖️", a: ["Weight", "Density", "Volume", "Height"], c: "Weight" }
+        { q: "Smallest unit of an element?", v: "⚛️", a: ["Atom", "Molecule", "Cell", "Tissue"], c: "Atom", exp: "An atom is the base unit of matter that defines an element." },
+        { q: "Fixed volume but no fixed shape?", v: "💧", a: ["Liquid", "Solid", "Gas", "Plasma"], c: "Liquid", exp: "Liquids flow to fit containers but cannot be compressed like gases." },
+        { q: "Earth's center layer?", v: "🌍", a: ["Core", "Mantle", "Crust", "Atmosphere"], c: "Core", exp: "The core is the innermost, hottest layer of Earth." },
+        { q: "Process plants use to make food?", v: "🌿", a: ["Photosynthesis", "Respiration", "Digestion", "Osmosis"], c: "Photosynthesis", exp: "Plants convert sunlight, water, and CO2 into glucose." },
+        { q: "Force that resists motion?", v: "👞", a: ["Friction", "Gravity", "Magnetism", "Inertia"], c: "Friction", exp: "Friction occurs when two surfaces rub against each other." },
+        { q: "Unit of electrical resistance?", v: "⚡", a: ["Ohm", "Volt", "Amp", "Watt"], c: "Ohm", exp: "Named after Georg Simon Ohm; it measures opposition to current." },
+        { q: "Gas most abundant in our air?", v: "☁️", a: ["Nitrogen", "Oxygen", "Carbon Dioxide", "Argon"], c: "Nitrogen", exp: "Nitrogen makes up about 78% of Earth's atmosphere." },
+        { q: "Circuit with only one path?", v: "🔌", a: ["Series circuit", "Parallel circuit", "Short circuit", "Open circuit"], c: "Series circuit", exp: "In series, electricity flows through components one after another." },
+        { q: "Energy of motion is...", v: "🏃", a: ["Kinetic", "Potential", "Thermal", "Chemical"], c: "Kinetic", exp: "Anything that is moving has kinetic energy." },
+        { q: "What is the pH of pure water?", v: "🧪", a: ["7", "0", "14", "1"], c: "7", exp: "7 is considered neutral on the pH scale." },
+        { q: "Blood cells that carry oxygen?", v: "🩸", a: ["Red cells", "White cells", "Platelets", "Plasma"], c: "Red cells", exp: "Hemoglobin in red blood cells binds to oxygen." },
+        { q: "Turning from gas to solid?", v: "❄️", a: ["Deposition", "Sublimation", "Freezing", "Melting"], c: "Deposition", exp: "Deposition skips the liquid phase (like frost forming)." },
+        { q: "The 'Brain' of the cell?", v: "🧬", a: ["Nucleus", "Vacuole", "Ribosome", "Wall"], c: "Nucleus", exp: "The nucleus contains genetic material and controls cell activity." },
+        { q: "Speed with a direction?", v: "🏎️", a: ["Velocity", "Acceleration", "Momentum", "Inertia"], c: "Velocity", exp: "Velocity is a vector quantity (magnitude + direction)." },
+        { q: "Rock formed by heat and pressure?", v: "💎", a: ["Metamorphic", "Igneous", "Sedimentary", "Magma"], c: "Metamorphic", exp: "Metamorphic rocks are 'changed' from other rocks by heat/pressure." },
+        { q: "Largest organ of the body?", v: "👤", a: ["Skin", "Liver", "Lungs", "Brain"], c: "Skin", exp: "The skin covers the entire body and provides protection." },
+        { q: "Temperature where all motion stops?", v: "🥶", a: ["Absolute Zero", "0°C", "0°F", "Freezing"], c: "Absolute Zero", exp: "At 0 Kelvin, particles have minimal thermal motion." },
+        { q: "Measures air pressure?", v: "🌡️", a: ["Barometer", "Anemometer", "Thermometer", "Hygrometer"], c: "Barometer", exp: "Barometers track atmospheric pressure for weather forecasting." },
+        { q: "Planets that lack solid surfaces?", v: "🪐", a: ["Gas Giants", "Terrestrial", "Dwarfs", "Moons"], c: "Gas Giants", exp: "Jupiter, Saturn, Uranus, and Neptune are made mostly of gas." },
+        { q: "Human body's master gland?", v: "🧠", a: ["Pituitary", "Thyroid", "Adrenal", "Heart"], c: "Pituitary", exp: "The pituitary gland controls many other endocrine glands." },
+        { q: "Speeds up chemical reactions?", v: "🧪", a: ["Catalyst", "Isotope", "Solvent", "Acid"], c: "Catalyst", exp: "Catalysts lower the activation energy required for a reaction." },
+        { q: "Moon phase when it is invisible?", v: "🌑", a: ["New Moon", "Full Moon", "Gibbous", "Crescent"], c: "New Moon", exp: "The New Moon occurs when the moon is between Earth and the Sun." },
+        { q: "Animal without a backbone?", v: "🐛", a: ["Invertebrate", "Mammal", "Reptile", "Bird"], c: "Invertebrate", exp: "97% of all animal species are invertebrates (like insects)." },
+        { q: "Study of weather?", v: "⛈️", a: ["Meteorology", "Geology", "Biology", "Astronomy"], c: "Meteorology", exp: "Meteorologists study atmospheric conditions." },
+        { q: "Pulls objects toward Earth?", v: "🌍", a: ["Gravity", "Tension", "Lift", "Drag"], c: "Gravity", exp: "Gravity is a force of attraction between masses." },
+        { q: "Clouds like cotton balls?", v: "☁️", a: ["Cumulus", "Stratus", "Cirrus", "Nimbus"], c: "Cumulus", exp: "Cumulus clouds are fluffy and indicate fair weather." },
+        { q: "Distance light travels in a year?", v: "✨", a: ["Light Year", "Parsec", "Astronomical Unit", "Mach"], c: "Light Year", exp: "It is a measure of distance, not time (approx. 6 trillion miles)." },
+        { q: "Atoms share electrons?", v: "🤝", a: ["Covalent", "Ionic", "Metallic", "Hydrogen"], c: "Covalent", exp: "Covalent bonds involve the sharing of electron pairs between atoms." },
+        { q: "Earth's orbit shape?", v: "🔄", a: ["Elliptical", "Circular", "Square", "Wavy"], c: "Elliptical", exp: "Kepler's First Law states orbits are slightly oval (elliptical)." },
+        { q: "First element on Periodic Table?", v: "🎈", a: ["Hydrogen", "Helium", "Lithium", "Oxygen"], c: "Hydrogen", exp: "Hydrogen is the simplest and most abundant element." },
+        { q: "Energy stored in a spring?", v: "🌀", a: ["Elastic Potential", "Thermal", "Kinetic", "Sound"], c: "Elastic Potential", exp: "Energy stored as a result of deformation is elastic potential." },
+        { q: "A push or pull?", v: "💥", a: ["Force", "Power", "Weight", "Work"], c: "Force", exp: "Newton's Second Law describes Force as Mass * Acceleration." },
+        { q: "Plant part that takes in water?", v: "🌱", a: ["Roots", "Leaves", "Stem", "Flower"], c: "Roots", exp: "Roots absorb water and nutrients from the soil via osmosis." },
+        { q: "Hottest planet?", v: "🔥", a: ["Venus", "Mercury", "Jupiter", "Mars"], c: "Venus", exp: "Venus has a thick atmosphere that traps heat (Greenhouse effect)." },
+        { q: "Measure of the pull of gravity?", v: "⚖️", a: ["Weight", "Density", "Volume", "Height"], c: "Weight", exp: "Weight changes based on gravity; mass stays the same." }
     ],
     "social": [
-        { q: "Who was the 'Father of the Constitution'?", v: "📜", a: ["James Madison", "Washington", "Jefferson", "Hamilton"], c: "James Madison" },
-        { q: "In which year did the US Civil War begin?", v: "⚔️", a: ["1861", "1776", "1812", "1914"], c: "1861" },
-        { q: "The first 10 Amendments are called...", v: "📜", a: ["Bill of Rights", "Preamble", "Articles", "Federalist"], c: "Bill of Rights" },
+        { q: "Who was 'Father of the Constitution'?", v: "📜", a: ["James Madison", "Washington", "Jefferson", "Hamilton"], c: "James Madison" },
+        { q: "Year the US Civil War began?", v: "⚔️", a: ["1861", "1776", "1812", "1914"], c: "1861" },
+        { q: "First 10 Amendments?", v: "📜", a: ["Bill of Rights", "Preamble", "Articles", "Federalist"], c: "Bill of Rights" },
         { q: "Ancient system of writing in Egypt?", v: "📐", a: ["Hieroglyphics", "Cuneiform", "Latin", "Sanskrit"], c: "Hieroglyphics" },
         { q: "Smallest country in the world?", v: "🇻🇦", a: ["Vatican City", "Monaco", "Iceland", "Malta"], c: "Vatican City" },
-        { q: "Who was the main author of the Declaration?", v: "✍️", a: ["Jefferson", "Franklin", "Adams", "Lincoln"], c: "Jefferson" },
-        { q: "Which empire built the Colosseum?", v: "🏛️", a: ["Roman", "Greek", "Ottoman", "Persian"], c: "Roman" },
+        { q: "Main author of the Declaration?", v: "✍️", a: ["Jefferson", "Franklin", "Adams", "Lincoln"], c: "Jefferson" },
+        { q: "Empire that built the Colosseum?", v: "🏛️", a: ["Roman", "Greek", "Ottoman", "Persian"], c: "Roman" },
         { q: "Capital of China?", v: "🇨🇳", a: ["Beijing", "Shanghai", "Tokyo", "Seoul"], c: "Beijing" },
-        { q: "War between the US and Great Britain (1800s)?", v: "🚢", a: ["War of 1812", "Revolution", "WW1", "Civil War"], c: "War of 1812" },
-        { q: "The imaginary line at 0° Longitude?", v: "🌍", a: ["Prime Meridian", "Equator", "Tropic", "Dateline"], c: "Prime Meridian" },
-        { q: "Who gave the 'Gettysburg Address'?", v: "🎩", a: ["Lincoln", "Kennedy", "Roosevelt", "Obama"], c: "Lincoln" },
-        { q: "Largest desert in the world?", v: "🏜️", a: ["Antarctic", "Sahara", "Gobi", "Atacama"], c: "Antarctic" },
-        { q: "Which explorer 'discovered' the Americas in 1492?", v: "⛵", a: ["Columbus", "Magellan", "Cook", "Vespucci"], c: "Columbus" },
-        { q: "Economic system based on private ownership?", v: "💰", a: ["Capitalism", "Communism", "Socialism", "Bartering"], c: "Capitalism" },
-        { q: "First person to sign the Declaration?", v: "✍️", a: ["John Hancock", "Sam Adams", "Ben Franklin", "Washington"], c: "John Hancock" },
-        { q: "Ancient civilization in the Andes Mountains?", v: "🏔️", a: ["Inca", "Aztec", "Maya", "Olmec"], c: "Inca" },
-        { q: "Which ocean is on the East Coast of the US?", v: "🌊", a: ["Atlantic", "Pacific", "Indian", "Arctic"], c: "Atlantic" },
-        { q: "Leader of the Civil Rights Movement (Dream)?", v: "🎙️", a: ["MLK Jr.", "Malcolm X", "John Lewis", "Thurgood"], c: "MLK Jr." },
-        { q: "Current number of Amendments to the Constitution?", v: "📜", a: ["27", "10", "50", "13"], c: "27" },
-        { q: "Which country gifted the Statue of Liberty?", v: "🗽", a: ["France", "England", "Germany", "Canada"], c: "France" },
-        { q: "The 'industrial revolution' began in which country?", v: "⚙️", a: ["Great Britain", "USA", "France", "Japan"], c: "Great Britain" },
+        { q: "War between US and Britain (1800s)?", v: "🚢", a: ["War of 1812", "Revolution", "WW1", "Civil War"], c: "War of 1812" },
+        { q: "Line at 0° Longitude?", v: "🌍", a: ["Prime Meridian", "Equator", "Tropic", "Dateline"], c: "Prime Meridian" },
+        { q: "Gave 'Gettysburg Address'?", v: "🎩", a: ["Lincoln", "Kennedy", "Roosevelt", "Obama"], c: "Lincoln" },
+        { q: "Largest cold desert?", v: "🏜️", a: ["Antarctic", "Sahara", "Gobi", "Atacama"], c: "Antarctic" },
+        { q: "Who 'discovered' Americas in 1492?", v: "⛵", a: ["Columbus", "Magellan", "Cook", "Vespucci"], c: "Columbus" },
+        { q: "Private ownership economy?", v: "💰", a: ["Capitalism", "Communism", "Socialism", "Bartering"], c: "Capitalism" },
+        { q: "First to sign the Declaration?", v: "✍️", a: ["John Hancock", "Sam Adams", "Ben Franklin", "Washington"], c: "John Hancock" },
+        { q: "Andes Mountain civilization?", v: "🏔️", a: ["Inca", "Aztec", "Maya", "Olmec"], c: "Inca" },
+        { q: "Ocean on US East Coast?", v: "🌊", a: ["Atlantic", "Pacific", "Indian", "Arctic"], c: "Atlantic" },
+        { q: "Leader with a 'Dream'?", v: "🎙️", a: ["MLK Jr.", "Malcolm X", "John Lewis", "Thurgood"], c: "MLK Jr." },
+        { q: "Number of Amendments today?", v: "📜", a: ["27", "10", "50", "13"], c: "27" },
+        { q: "Gifted the Statue of Liberty?", v: "🗽", a: ["France", "England", "Germany", "Canada"], c: "France" },
+        { q: "Where Industrial Revolution began?", v: "⚙️", a: ["Great Britain", "USA", "France", "Japan"], c: "Great Britain" },
         { q: "Longest river in the world?", v: "🛶", a: ["Nile", "Amazon", "Mississippi", "Yangtze"], c: "Nile" },
-        { q: "Amendment that gave women the right to vote?", v: "🗳️", a: ["19th", "1st", "13th", "21st"], c: "19th" },
-        { q: "Period of history 'rebirth' after Middle Ages?", v: "🎨", a: ["Renaissance", "Enlightenment", "Victorian", "Dark Ages"], c: "Renaissance" },
-        { q: "What was the trail used to move Native Americans?", v: "👣", a: ["Trail of Tears", "Oregon Trail", "Santa Fe", "Silk Road"], c: "Trail of Tears" },
-        { q: "President during the Great Depression?", v: "📉", a: ["FDR", "Hoover", "Truman", "Wilson"], c: "FDR" },
-        { q: "River that runs through Egypt?", v: "🇪🇬", a: ["Nile", "Congo", "Jordan", "Euphrates"], c: "Nile" },
-        { q: "Who 'won' the Space Race by landing on the moon?", v: "🚀", a: ["USA", "USSR", "China", "Germany"], c: "USA" },
-        { q: "System where people vote for leaders?", v: "⚖️", a: ["Republic/Democracy", "Monarchy", "Dictatorship", "Theocracy"], c: "Republic/Democracy" },
-        { q: "What event triggered World War I?", v: "🔫", a: ["Assassination of Archduke", "Pearl Harbor", "D-Day", "Atomic Bomb"], c: "Assassination of Archduke" },
-        { q: "The 'Liberty Bell' is located in...", v: "🔔", a: ["Philadelphia", "DC", "Boston", "NYC"], c: "Philadelphia" },
-        { q: "Who wrote 'Common Sense'?", v: "✍️", a: ["Thomas Paine", "Franklin", "Jefferson", "Adams"], c: "Thomas Paine" },
-        { q: "Country with the most population?", v: "🌍", a: ["India", "China", "USA", "Russia"], c: "India" },
+        { q: "Amendment for women's voting?", v: "🗳️", a: ["19th", "1st", "13th", "21st"], c: "19th" },
+        { q: "Rebirth period after Middle Ages?", v: "🎨", a: ["Renaissance", "Enlightenment", "Victorian", "Dark Ages"], c: "Renaissance" },
+        { q: "Forced Native American move?", v: "👣", a: ["Trail of Tears", "Oregon Trail", "Santa Fe", "Silk Road"], c: "Trail of Tears" },
+        { q: "President during Great Depression?", v: "📉", a: ["FDR", "Hoover", "Truman", "Wilson"], c: "FDR" },
+        { q: "River through Egypt?", v: "🇪🇬", a: ["Nile", "Congo", "Jordan", "Euphrates"], c: "Nile" },
+        { q: "Won Space Race to the moon?", v: "🚀", a: ["USA", "USSR", "China", "Germany"], c: "USA" },
+        { q: "System where people vote?", v: "⚖️", a: ["Republic", "Monarchy", "Dictatorship", "Theocracy"], c: "Republic" },
+        { q: "Trigger for World War I?", v: "🔫", a: ["Assassination", "Pearl Harbor", "D-Day", "Atomic Bomb"], c: "Assassination" },
+        { q: "Liberty Bell location?", v: "🔔", a: ["Philadelphia", "DC", "Boston", "NYC"], c: "Philadelphia" },
+        { q: "Wrote 'Common Sense'?", v: "✍️", a: ["Thomas Paine", "Franklin", "Jefferson", "Adams"], c: "Thomas Paine" },
+        { q: "Highest population today?", v: "🌍", a: ["India", "China", "USA", "Russia"], c: "India" },
         { q: "Main axis power in WW2?", v: "⚔️", a: ["Germany", "England", "Russia", "USA"], c: "Germany" },
-        { q: "US Branch that makes laws?", v: "⚖️", a: ["Legislative", "Executive", "Judicial", "State"], c: "Legislative" }
+        { q: "Branch that makes laws?", v: "⚖️", a: ["Legislative", "Executive", "Judicial", "State"], c: "Legislative" }
+    ],
+    "ela": [
+        // MCQs (17)
+        { q: "Synonym for 'Meticulous'?", a: ["Careful", "Messy", "Fast", "Angry"], c: "Careful" },
+        { q: "Meaning of 'Exhilarating'?", a: ["Thrilling", "Boring", "Tiring", "Scary"], c: "Thrilling" },
+        { q: "Antonym for 'Fragile'?", a: ["Sturdy", "Weak", "Broken", "Small"], c: "Sturdy" },
+        { q: "Identify the Onomatopoeia:", a: ["Sizzle", "Bright", "Quickly", "Walked"], c: "Sizzle" },
+        { q: "Main character is the...", a: ["Protagonist", "Antagonist", "Narrator", "Dynamic"], c: "Protagonist" },
+        { q: "A 'Hyperbole' is a huge...", a: ["Exaggeration", "Comparison", "Understatement", "Lie"], c: "Exaggeration" },
+        { q: "Which is a 'Proper Noun'?", a: ["Tokyo", "City", "Mountain", "River"], c: "Tokyo" },
+        { q: "Identify the Adjective: 'The silent room.'", a: ["Silent", "The", "Room", "Is"], c: "Silent" },
+        { q: "Past tense of 'Catch'?", a: ["Caught", "Catched", "Catching", "Catchs"], c: "Caught" },
+        { q: "A group of lines in a poem?", a: ["Stanza", "Paragraph", "Chapter", "Verse"], c: "Stanza" },
+        { q: "Meaning of the prefix 'Bio-'?", a: ["Life", "Earth", "Small", "Against"], c: "Life" },
+        { q: "Opposite of 'Chaos'?", a: ["Order", "Mess", "Noise", "Wild"], c: "Order" },
+        { q: "Identify the conjunction:", a: ["Because", "Jump", "Yellow", "He"], c: "Because" },
+        { q: "Meaning of the suffix '-less'?", a: ["Without", "Full of", "Able to", "Most"], c: "Without" },
+        { q: "Identify the pronoun: 'We will win.'", a: ["We", "Will", "Win", "Them"], c: "We" },
+        { q: "Synonym for 'Lethargic'?", a: ["Tired", "Excited", "Fast", "Angry"], c: "Tired" },
+        { q: "Which word is misspelled?", a: ["Recieve", "Believe", "Achieve", "Deceive"], c: "Recieve" },
+        // FITB (5)
+        { q: "Complete the sentence: 'She _____ to the store yesterday.'", type: "typed", c: "went" },
+        { q: "Fill in the blank: 'The prefix _____ means 'before'.'", type: "typed", c: "pre" },
+        { q: "A comparison using 'like' or 'as' is a _____.", type: "typed", c: "simile" },
+        { q: "The opposite of 'strong' is _____.", type: "typed", c: "weak" },
+        { q: "A person who writes a book is an _____.", type: "typed", c: "author" },
+        // Passages (8)
+        { ctx: "The old library was a labyrinth of oak shelves.", q: "The word 'labyrinth' suggests the library is...", a: ["Complex", "Small", "Modern", "Empty"], c: "Complex" },
+        { ctx: "The rain drummed against the glass like tiny fingers.", q: "What is the mood?", a: ["Gloomy", "Exciting", "Joyful", "Scary"], c: "Gloomy" },
+        { ctx: "Over 97% of Earth's water is salty.", q: "What percentage is NOT in oceans?", a: ["3%", "97%", "50%", "10%"], c: "3%" },
+        { ctx: "The lighthouse stood as a silent sentinel.", q: "Explain the 'silent sentinel' metaphor.", type: "typed", c: "MR" },
+        { ctx: "Many believe uniforms improve focus.", q: "What is the main conflict?", a: ["Uniforms vs Expression", "Focus vs Grades", "Teachers vs Students", "Price vs Quality"], c: "Uniforms vs Expression" },
+        { ctx: "To be, or not to be...", q: "Identify the internal conflict.", type: "typed", c: "MR" },
+        { ctx: "Peaks touching the clouds like frosting.", q: "Identify the simile.", a: ["Like white frosting", "Peaks touching", "Stood tall", "White clouds"], c: "Like white frosting" },
+        { ctx: "The map was upside down.", q: "How does this detail contribute to the tone?", type: "typed", c: "MR" },
+        // Essays (5)
+        { q: "Why is reading important? (4-5 sentences)", type: "typed", c: "MR" },
+        { q: "Describe a challenge you faced.", type: "typed", c: "MR" },
+        { q: "Argue for/against classroom tech.", type: "typed", c: "MR" },
+        { q: "Difference between 'Theme' and 'Plot'.", type: "typed", c: "MR" },
+        { q: "Describe your favorite character.", type: "typed", c: "MR" }
     ]
 };
 
+let gameDeck = [];
+let gameState = { sub: "", idx: 0, rit: 215, streak: 0, gradeIdx: 0, correct: 0 };
 const grades = ["GRADE 6", "GRADE 7", "GRADE 8"];
-let state = { sub: "", idx: 0, rit: 215, seen: [], streak: 0, gradeIdx: 0, correct: 0 };
 
-function run(s) {
-    state = { sub: s, idx: 0, rit: 215, seen: [], streak: 0, gradeIdx: 0, correct: 0 };
+function startTest(subject) {
+    gameState = { sub: subject, idx: 0, rit: 215, streak: 0, gradeIdx: 0, correct: 0 };
+    gameDeck = [...allData[subject]].sort(() => Math.random() - 0.5);
     document.getElementById('home').classList.add('hidden');
     document.getElementById('quiz').classList.remove('hidden');
-    document.getElementById('progress-fill').style.background = `var(--${s})`;
-    render();
+    document.getElementById('progress-fill').style.background = `var(--${subject})`;
+    renderQuestion();
 }
 
-function render() {
-    if (state.idx >= 30) return finish(); // Ends exactly at 30 items
-    if (state.streak >= 3) { state.streak = 0; if (state.gradeIdx < 2) state.gradeIdx++; }
+function renderQuestion() {
+    if (gameState.idx >= 30 || gameDeck.length === 0) return finishTest();
 
-    let pool = items[state.sub].filter(q => !state.seen.includes(q.q));
-    if (pool.length === 0) return finish(); 
-    
-    let q = pool[Math.floor(Math.random() * pool.length)];
-    state.seen.push(q.q);
-    
-    document.getElementById('q-count').innerText = `ITEM ${state.idx + 1} / 30`;
-    document.getElementById('grade-level').innerText = grades[state.gradeIdx];
-    document.getElementById('progress-fill').style.width = `${(state.idx / 30) * 100}%`;
-    document.getElementById('visual-area').innerText = q.v;
-    document.getElementById('q-text').innerText = q.q;
+    document.getElementById('feedback-area').classList.add('hidden');
+    const inputArea = document.getElementById('input-area');
+    inputArea.classList.remove('hidden');
+    inputArea.innerHTML = "";
 
-    for(let i=1; i<=3; i++) { 
-        document.getElementById(`d${i}`).className = i <= state.streak ? "dot active" : "dot"; 
+    if (gameState.streak >= 3) {
+        gameState.streak = 0;
+        if (gameState.gradeIdx < 2) gameState.gradeIdx++;
     }
 
-    let box = document.getElementById('options');
-    box.innerHTML = "";
-    [...q.a].sort(() => Math.random() - 0.5).forEach(opt => {
-        let b = document.createElement('button');
-        b.className = "btn";
-        b.innerText = opt;
-        b.onclick = () => {
-            if(opt === q.c) { 
-                state.rit += 4; state.streak++; state.correct++; 
-            } else { 
-                if (state.streak === 0 && state.gradeIdx > 0) state.gradeIdx--;
-                state.rit = Math.max(160, state.rit - 3); 
-                state.streak = 0; 
-            }
-            state.idx++; render();
-        };
-        box.appendChild(b);
-    });
+    const currentQ = gameDeck.shift(); 
+    
+    const passageCont = document.getElementById('passage-container');
+    const visualArea = document.getElementById('visual-area');
+    if(currentQ.ctx) { passageCont.innerText = currentQ.ctx; passageCont.classList.remove('hidden'); }
+    else { passageCont.classList.add('hidden'); }
+
+    if(currentQ.v && gameState.sub !== 'ela') { visualArea.innerText = currentQ.v; visualArea.classList.remove('hidden'); }
+    else { visualArea.classList.add('hidden'); }
+
+    document.getElementById('q-count').innerText = `ITEM ${gameState.idx + 1} / 30`;
+    document.getElementById('grade-level').innerText = grades[gameState.gradeIdx];
+    document.getElementById('progress-fill').style.width = `${(gameState.idx / 30) * 100}%`;
+    document.getElementById('q-text').innerText = currentQ.q;
+
+    if (currentQ.type === "typed") {
+        const ta = document.createElement('textarea');
+        ta.placeholder = "Type your response here...";
+        const b = document.createElement('button');
+        b.className = "btn sub-btn";
+        b.style.background = `var(--${gameState.sub})`;
+        b.innerText = "Submit Response";
+        b.onclick = () => showFeedback(ta.value.toLowerCase().trim(), currentQ);
+        inputArea.appendChild(ta);
+        inputArea.appendChild(b);
+    } else {
+        [...currentQ.a].sort(() => Math.random() - 0.5).forEach(opt => {
+            let b = document.createElement('button');
+            b.className = "btn";
+            b.innerText = opt;
+            b.onclick = () => showFeedback(opt, currentQ);
+            inputArea.appendChild(b);
+        });
+    }
 }
 
-function finish() {
+function showFeedback(userAns, qObj) {
+    const inputArea = document.getElementById('input-area');
+    const fbArea = document.getElementById('feedback-area');
+    const fbMsg = document.getElementById('feedback-msg');
+    const nextBtn = document.getElementById('next-btn');
+
+    inputArea.classList.add('hidden');
+    fbArea.classList.remove('hidden');
+
+    let isCorrect = false;
+    if(qObj.c === "MR") {
+        isCorrect = userAns.length > 3;
+        fbMsg.className = "correct-fb";
+        fbMsg.innerHTML = "✓ Response Captured! <br> Record saved for adaptive scoring.";
+    } else if(userAns === qObj.c.toLowerCase() || userAns === qObj.c) {
+        isCorrect = true;
+        fbMsg.className = "correct-fb";
+        fbMsg.innerHTML = "✓ Correct! Great job.";
+    } else {
+        isCorrect = false;
+        fbMsg.className = "wrong-fb";
+        let feedbackHTML = `✗ Incorrect. <br> The correct answer was: <strong>${qObj.c}</strong>`;
+        
+        // Add STEM Explanation if applicable
+        if((gameState.sub === 'math' || gameState.sub === 'science') && qObj.exp) {
+            feedbackHTML += `<div class="explanation-text"><strong>Explanation:</strong> ${qObj.exp}</div>`;
+        }
+        fbMsg.innerHTML = feedbackHTML;
+    }
+
+    if(isCorrect) {
+        gameState.rit += 4; gameState.streak++; gameState.correct++;
+    } else {
+        if (gameState.streak === 0 && gameState.gradeIdx > 0) gameState.gradeIdx--;
+        gameState.rit = Math.max(160, gameState.rit - 3); 
+        gameState.streak = 0;
+    }
+
+    nextBtn.onclick = () => {
+        gameState.idx++;
+        renderQuestion();
+    };
+}
+
+function finishTest() {
     document.getElementById('quiz').classList.add('hidden');
     document.getElementById('results').classList.remove('hidden');
-    document.getElementById('final-rit').innerText = state.rit;
-    document.getElementById('accuracy').innerText = `Final Result: ${state.correct} / 30`;
+    document.getElementById('final-rit').innerText = gameState.rit;
+    document.getElementById('accuracy').innerText = `Assessment Complete: ${gameState.correct} / 30`;
 }
 </script>
 </body>
